@@ -1,15 +1,47 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/app/ui/button'
 
-export default function Form() {
+import { Customer } from '@/app/lib/definitions'
+
+interface UpdateFormProps {
+	customer: Customer
+}
+
+export default function UpdateForm({ customer }: UpdateFormProps) {
+	const router = useRouter()
+
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+
+		const formData = new FormData(event.currentTarget)
+
+		const response = await fetch('/api/customers', {
+			method: 'PUT',
+			body: formData,
+		})
+
+		if (response.ok) {
+			router.push('/dashboard/customers')
+		} else {
+			console.error('Failed to update customer')
+		}
+	}
+
 	return (
-		<form
-			action="/api/customers"
-			method="post"
-		>
+		<form onSubmit={handleSubmit}>
 			<div className="rounded-md bg-gray-50 p-4 md:p-6">
+				<h1 className="text-xl font-semibold mb-4">
+					Updating Customer: {customer.name}
+				</h1>
+				<input
+					type="hidden"
+					name="id"
+					value={customer.id}
+				/>
+
 				{/* Customer Name */}
 				<div className="mb-4">
 					<label
@@ -25,6 +57,7 @@ export default function Form() {
 								name="name"
 								type="text"
 								placeholder="Name"
+								defaultValue={customer.name}
 								className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
 								required
 							/>
@@ -46,6 +79,7 @@ export default function Form() {
 								name="phone"
 								type="text"
 								placeholder="+420 [XXX-XXX-XXX-XXX] without any space or dash"
+								defaultValue={customer.phone}
 								className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
 								required
 							/>
@@ -67,6 +101,7 @@ export default function Form() {
 								name="email"
 								type="email"
 								placeholder="Email"
+								defaultValue={customer.email}
 								className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
 								required
 							/>
@@ -81,7 +116,7 @@ export default function Form() {
 				>
 					Cancel
 				</Link>
-				<Button type="submit">Create Customer</Button>
+				<Button type="submit">Update Customer</Button>
 			</div>
 		</form>
 	)

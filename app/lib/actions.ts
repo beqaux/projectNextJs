@@ -10,69 +10,63 @@ import { AuthError } from 'next-auth'
 const FormSchema = z.object({
 	id: z.string(),
 	customerId: z.string(),
-	amount: z.coerce.number(),
-	status: z.enum(['pending', 'paid']),
+	note: z.string(),
 	date: z.string(),
 })
 
-const CreateInvoice = FormSchema.omit({ id: true, date: true })
-const UpdateInvoice = FormSchema.omit({ id: true, date: true })
+const CreateAppointment = FormSchema.omit({ id: true, date: true })
+const UpdateAppointment = FormSchema.omit({ id: true, date: true })
 
-export async function createInvoice(formData: FormData) {
-	const { customerId, amount, status } = CreateInvoice.parse({
+export async function createAppointment(formData: FormData) {
+	const { customerId, note } = CreateAppointment.parse({
 		customerId: formData.get('customerId'),
-		amount: formData.get('amount'),
-		status: formData.get('status'),
+		note: formData.get('note'),
 	})
 
-	const amountInCents = amount * 100
 	const date = new Date().toISOString().split('T')[0]
 
 	try {
 		await sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+        INSERT INTO appointments (customer_id, note, date)
+        VALUES (${customerId}, ${note}, ${date})
         `
 	} catch (error) {
 		return {
-			message: 'Database Error: Failed to Create Invoice.',
+			message: 'Database Error: Failed to Create Appointment.',
 		}
 	}
 
-	revalidatePath('/dashboard/invoices')
-	redirect('/dashboard/invoices')
+	revalidatePath('/dashboard/appointments')
+	redirect('/dashboard/appointments')
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-	const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateAppointment(id: string, formData: FormData) {
+	const { customerId, note } = UpdateAppointment.parse({
 		customerId: formData.get('customerId'),
-		amount: formData.get('amount'),
-		status: formData.get('status'),
+		note: formData.get('note'),
 	})
-
-	const amountInCents = amount * 100
 
 	try {
 		await sql`
-        UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        UPDATE appointments
+        SET customer_id = ${customerId}, note = ${note}
         WHERE id = ${id}
         `
 	} catch (error) {
-		return { message: 'Database Error: Failed to Update Invoice.' }
+		return { message: 'Database Error: Failed to Update Appointment.' }
 	}
 
-	revalidatePath('/dashboard/invoices')
-	redirect('/dashboard/invoices')
+	revalidatePath('/dashboard/appointments')
+	redirect('/dashboard/appointments')
 }
 
-export async function deleteInvoice(id: string) {
+export async function deleteAppointment(id: string) {
 	try {
-		await sql`DELETE FROM invoices WHERE id = ${id}`
-		revalidatePath('/dashboard/invoices')
-		return { message: 'Deleted Invoice.' }
+		await sql`DELETE FROM appointments WHERE id = ${id}`
+		revalidatePath('/dashboard/appointments')
+		return { message: 'Deleted Appointment.' }
 	} catch (error) {
-		return { message: 'Database Error: Failed to Delete Invoice.' }
+		return { message: 'Database Error: Failed to Delete Appointment.' }
 	}
 }
 

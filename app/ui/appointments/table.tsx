@@ -1,26 +1,27 @@
-import Image from 'next/image'
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons'
-import InvoiceStatus from '@/app/ui/invoices/status'
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils'
-import { fetchFilteredInvoices } from '@/app/lib/data'
+import {
+	UpdateAppointment,
+	DeleteAppointment,
+} from '@/app/ui/appointments/buttons'
+import { formatDateToLocal } from '@/app/lib/utils'
+import { fetchFilteredAppointments } from '@/app/lib/data'
 
-export default async function InvoicesTable({
+export default async function AppointmentsTable({
 	query,
 	currentPage,
 }: {
 	query: string
 	currentPage: number
 }) {
-	const invoices = await fetchFilteredInvoices(query, currentPage)
+	const appointments = await fetchFilteredAppointments(query, currentPage)
 
 	return (
 		<div className="mt-6 flow-root">
 			<div className="inline-block min-w-full align-middle">
 				<div className="rounded-lg bg-gray-50 p-2 md:pt-0">
 					<div className="md:hidden">
-						{invoices?.map((invoice) => (
+						{appointments?.map((appointment) => (
 							<div
-								key={invoice.id}
+								key={appointment.id}
 								className="mb-2 w-full rounded-md bg-white p-4"
 							>
 								<div className="flex items-center justify-between border-b pb-4">
@@ -33,22 +34,19 @@ export default async function InvoicesTable({
 												height={28}
 												alt={`${invoice.name}'s profile picture`}
 											/> */}
-											<p>{invoice.name}</p>
+											<p>{appointment.name}</p>
 										</div>
-										<p className="text-sm text-gray-500">{invoice.email}</p>
+										{/* note place */}
+										<p className="text-sm text-gray-500">{appointment.note}</p>
 									</div>
-									<InvoiceStatus status={invoice.status} />
 								</div>
 								<div className="flex w-full items-center justify-between pt-4">
 									<div>
-										<p className="text-xl font-medium">
-											{formatCurrency(invoice.amount)}
-										</p>
-										<p>{formatDateToLocal(invoice.date)}</p>
+										<p>{formatDateToLocal(appointment.date)}</p>
 									</div>
 									<div className="flex justify-end gap-2">
-										<UpdateInvoice id={invoice.id} />
-										<DeleteInvoice id={invoice.id} />
+										<UpdateAppointment id={appointment.id} />
+										<DeleteAppointment id={appointment.id} />
 									</div>
 								</div>
 							</div>
@@ -67,25 +65,13 @@ export default async function InvoicesTable({
 									scope="col"
 									className="px-3 py-5 font-medium"
 								>
-									Email
-								</th>
-								<th
-									scope="col"
-									className="px-3 py-5 font-medium"
-								>
-									Amount
+									Note
 								</th>
 								<th
 									scope="col"
 									className="px-3 py-5 font-medium"
 								>
 									Date
-								</th>
-								<th
-									scope="col"
-									className="px-3 py-5 font-medium"
-								>
-									Status
 								</th>
 								<th
 									scope="col"
@@ -96,9 +82,9 @@ export default async function InvoicesTable({
 							</tr>
 						</thead>
 						<tbody className="bg-white">
-							{invoices?.map((invoice) => (
+							{appointments?.map((appointment) => (
 								<tr
-									key={invoice.id}
+									key={appointment.id}
 									className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
 								>
 									<td className="whitespace-nowrap py-3 pl-6 pr-3">
@@ -110,23 +96,18 @@ export default async function InvoicesTable({
 												height={28}
 												alt={`${invoice.name}'s profile picture`}
 											/> */}
-											<p>{invoice.name}</p>
+											<p>{appointment.name}</p>
 										</div>
 									</td>
-									<td className="whitespace-nowrap px-3 py-3">{invoice.email}</td>
+									<td className="whitespace-nowrap px-3 py-3">{appointment.note}</td>
+
 									<td className="whitespace-nowrap px-3 py-3">
-										{formatCurrency(invoice.amount)}
-									</td>
-									<td className="whitespace-nowrap px-3 py-3">
-										{formatDateToLocal(invoice.date)}
-									</td>
-									<td className="whitespace-nowrap px-3 py-3">
-										<InvoiceStatus status={invoice.status} />
+										{formatDateToLocal(appointment.date)}
 									</td>
 									<td className="whitespace-nowrap py-3 pl-6 pr-3">
 										<div className="flex justify-end gap-3">
-											<UpdateInvoice id={invoice.id} />
-											<DeleteInvoice id={invoice.id} />
+											<UpdateAppointment id={appointment.id} />
+											<DeleteAppointment id={appointment.id} />
 										</div>
 									</td>
 								</tr>

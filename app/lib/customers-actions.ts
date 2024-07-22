@@ -17,8 +17,11 @@ const FormSchema = z.object({
 	date: z.string(),
 })
 
-const CreateCustomer = FormSchema.omit({ id: true, date: true })
-const UpdateCustomer = FormSchema.omit({ id: true, date: true })
+const CreateCustomer = z.object({
+	name: z.string(),
+	phone: z.string(),
+	email: z.string(),
+})
 
 export async function createCustomer(formData: FormData) {
 	const { name, phone, email } = CreateCustomer.parse({
@@ -27,13 +30,10 @@ export async function createCustomer(formData: FormData) {
 		email: formData.get('email'),
 	})
 
-	const customerId = randomUUID()
-	const date = new Date().toISOString().split('T')[0]
-
 	try {
 		await sql`
-        INSERT INTO customers (customer_id, name, phone, email, date)
-        VALUES (${customerId}, ${name}, ${phone}, ${email}, ${date})
+        INSERT INTO customers (name, phone, email)
+        VALUES (${name}, ${phone}, ${email}})
         `
 	} catch (error) {
 		return {
@@ -46,7 +46,7 @@ export async function createCustomer(formData: FormData) {
 }
 
 export async function updateCustomer(id: string, formData: FormData) {
-	const { customerId, name, phone, email } = UpdateCustomer.parse({
+	const { customerId, name, phone, email } = FormSchema.parse({
 		customerId: formData.get('customerId'),
 		name: formData.get('name'),
 		phone: formData.get('phone'),
