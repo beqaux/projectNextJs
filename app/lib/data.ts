@@ -14,12 +14,7 @@ export async function fetchRevenue() {
 		// Artificially delay a response for demo purposes.
 		// Don't do this in production :)
 
-		console.log('Fetching revenue data...')
-		await new Promise((resolve) => setTimeout(resolve, 3000))
-
 		const data = await sql<Revenue>`SELECT * FROM revenue`
-
-		console.log('Data fetch completed after 3 seconds.')
 
 		return data.rows
 	} catch (error) {
@@ -182,7 +177,7 @@ export async function fetchCustomers() {
 		throw new Error('Failed to fetch all customers.')
 	}
 }
-
+//delete image_url
 export async function fetchFilteredCustomers(query: string) {
 	try {
 		const data = await sql<CustomersTableType>`
@@ -208,6 +203,33 @@ export async function fetchFilteredCustomers(query: string) {
 			total_pending: formatCurrency(customer.total_pending),
 			total_paid: formatCurrency(customer.total_paid),
 		}))
+
+		return customers
+	} catch (err) {
+		console.error('Database Error:', err)
+		throw new Error('Failed to fetch customer table.')
+	}
+}
+
+export async function fetchModifiedCustomers(query: string) {
+	try {
+		const data = await sql<CustomersTableType>`
+		SELECT
+		  customers.id,
+		  customers.name,
+		  customers.email,
+		  customers.phone
+		  COUNT(invoices.id) AS total_invoices
+		FROM customers
+		LEFT JOIN invoices ON customers.id = invoices.customer_id
+		WHERE
+		  customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`}
+		GROUP BY customers.id, customers.name, customers.email
+		ORDER BY customers.name ASC
+	  `
+
+		const customers = data.rows
 
 		return customers
 	} catch (err) {
